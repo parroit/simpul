@@ -27,7 +27,7 @@ public class EventLoop implements Interfaces.EventEmitter{
 
 
 
-    EventLoop() {
+    public EventLoop() {
         service = Executors.newSingleThreadExecutor();
         events = new EventEmitter();
         eventsInLoop = new AtomicLong();

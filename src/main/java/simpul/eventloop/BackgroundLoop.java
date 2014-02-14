@@ -8,6 +8,13 @@ public enum BackgroundLoop {
 
     private final AtomicLong pendingCallbacks;
 
+    public void addPendingOperation() {
+        pendingCallbacks.incrementAndGet();
+    }
+    public void removePendingOperation() {
+        pendingCallbacks.decrementAndGet();
+    }
+
     public long pendingOperations() {
         return pendingCallbacks.get();
     }
