@@ -1,6 +1,5 @@
 package simpul.core;
 
-import simpul.eventloop.BackgroundLoop;
 import simpul.eventloop.EventLoop;
 
 import java.util.Timer;
@@ -17,13 +16,10 @@ public class Timers{
     Timers(EventLoop eventLoop) {
         this.eventLoop = eventLoop;
         systemTimer = new Timer("system-timer", true);
-        scheduled = new ConcurrentHashMap<Long,Task>();
+        scheduled = new ConcurrentHashMap<>();
         nextId = 0;
     }
 
-    public long getScheduled(){
-        return scheduled.size();
-    }
 
     private class Task extends TimerTask{
         private final Runnable runnable;
@@ -31,7 +27,7 @@ public class Timers{
         private long id;
 
         public Task(Runnable runnable, boolean interval, long id){
-            BackgroundLoop.INSTANCE.addPendingOperation();
+            eventLoop.addBackgroundOperation();
             this.runnable = runnable;
             this.interval = interval;
             this.id = id;
@@ -40,7 +36,7 @@ public class Timers{
         public void run(){
             if (!interval) {
                 scheduled.remove(id);
-                BackgroundLoop.INSTANCE.removePendingOperation();
+                eventLoop.removeBackgroundOperation();
             }
 
             eventLoop.runTicket(runnable);
@@ -96,7 +92,7 @@ public class Timers{
         if (task != null) {
             task.cancel();
             scheduled.remove(id);
-            BackgroundLoop.INSTANCE.removePendingOperation();
+            eventLoop.removeBackgroundOperation();
         }
     }
 

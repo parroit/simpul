@@ -3,6 +3,7 @@ package simpul.eventloop;
 import simpul.Interfaces;
 import simpul.core.EventEmitter;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -19,28 +20,40 @@ import java.util.concurrent.atomic.AtomicLong;
  * When there are no tickets and no background operations pending, the ExecutorService
  * is shutdown, and event loop terminate
  */
-public class EventLoop implements Interfaces.EventEmitter{
+public class EventLoop implements Interfaces.EventEmitter {
 
     private final ExecutorService service;
     private final AtomicLong eventsInLoop;
     private final Interfaces.EventEmitter events;
 
+    public <T> void runInBackground(Callable<T> backgroundTask, Interfaces.Callback<T> cb) {
+        background.runInBackground(backgroundTask, cb);
+    }
+
+
+    public void addBackgroundOperation() {
+        background.addPendingOperation();
+    }
+
+    public void removeBackgroundOperation() {
+        background.removePendingOperation();
+    }
+
+    private final BackgroundLoop background;
 
 
     public EventLoop() {
         service = Executors.newSingleThreadExecutor();
         events = new EventEmitter();
         eventsInLoop = new AtomicLong();
+        background = new BackgroundLoop(this);
     }
-
-
 
 
     /**
      * Wait for event loop termination for a number of milliseconds, then return.
      * This method is mainly useful for testing purpose, the normal use of EventLoop
      * does not need it, because the program is kept running while the event loop is running.
-     *
      *
      * @param milliseconds number of second to wait for termination
      * @return true if the event loop is terminated, false if the timeout elapsed
@@ -69,9 +82,7 @@ public class EventLoop implements Interfaces.EventEmitter{
                 ticket.run();
 
             } catch (Throwable t) {
-                runTicket(()->{
-                    emit("uncaughtException",t);
-                });
+                runTicket(() -> emit("uncaughtException", t));
 
 
             } finally {
@@ -79,11 +90,7 @@ public class EventLoop implements Interfaces.EventEmitter{
                 long inLoop = eventsInLoop.decrementAndGet();
 
 
-                if (
-                        inLoop == 0 &&
-                                BackgroundLoop.INSTANCE.pendingOperations() == 0
-
-                        ) {
+                if (inLoop == 0 && background.pendingOperations() == 0) {
                     service.shutdown();
                 }
             }
@@ -93,10 +100,9 @@ public class EventLoop implements Interfaces.EventEmitter{
     }
 
 
-
     @Override
     public <T> void on(String event, Interfaces.EventCallback<T> cb) {
-        events.on(event,cb);
+        events.on(event, cb);
     }
 
     @Override
@@ -106,7 +112,7 @@ public class EventLoop implements Interfaces.EventEmitter{
 
     @Override
     public <T> void removeListener(String event, Interfaces.EventCallback<T> cb) {
-        events.removeListener(event,cb);
+        events.removeListener(event, cb);
     }
 
     @Override
