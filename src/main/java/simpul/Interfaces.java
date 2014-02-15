@@ -17,10 +17,19 @@ public final class Interfaces {
     public static interface EventEmitter {
         <T>void on  (String event,EventCallback<T> cb);
         <T>void once  (String event,EventCallback<T> cb);
-        <T>void emit  (String event,T data);
+        <T>void emit  (String event,T data) ;
         <T>void removeListener(String event,EventCallback<T> cb);
         void removeAllListeners(String event);
+        int listeners(String event);
+
+    }
+
+    public static interface ReadableStream extends EventEmitter{
 
 
     }
+
+
+
+
 }

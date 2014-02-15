@@ -61,7 +61,7 @@ public class EventEmitter implements Interfaces.EventEmitter{
     }
 
     @Override
-    public <T> void emit(String event, T data) {
+    public <T> void emit(String event, T data)  {
         List<RegisteredCallback> callbacks = listeners.get(event);
         if (callbacks == null) {
             return;
@@ -93,5 +93,16 @@ public class EventEmitter implements Interfaces.EventEmitter{
     @Override
     public void removeAllListeners(String event) {
         listeners.remove(event);
+    }
+
+    @Override
+    public int listeners(String event) {
+        List<RegisteredCallback> callbacks = listeners.get(event);
+        if (callbacks == null) {
+            return 0;
+        }
+
+        return callbacks.size();
+
     }
 }

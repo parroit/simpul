@@ -121,6 +121,11 @@ public class EventLoop implements Interfaces.EventEmitter {
     }
 
     @Override
+    public int listeners(String event) {
+        return events.listeners(event);
+    }
+
+    @Override
     public <T> void once(String event, Interfaces.EventCallback<T> cb) {
         events.once(event, cb);
     }
