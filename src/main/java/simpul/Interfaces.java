@@ -20,5 +20,7 @@ public final class Interfaces {
         <T>void emit  (String event,T data);
         <T>void removeListener(String event,EventCallback<T> cb);
         void removeAllListeners(String event);
+
+
     }
 }
